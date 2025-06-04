@@ -6,8 +6,7 @@ interface Timer {
   id: string;
   title: string;
   targetDate: Date;
-  type: "event" | "birthday";
-  birthYear?: number;
+  birthYear: number;
 }
 
 const Index = () => {
@@ -66,11 +65,11 @@ const Index = () => {
         {/* Header */}
         <div className="text-center mb-12">
           <h1 className="text-4xl md:text-5xl font-bold font-montserrat bg-gradient-to-r from-purple-600 to-indigo-600 bg-clip-text text-transparent mb-4">
-            🚀 Космический Таймер
+            🎂 Дни Рождения
           </h1>
           <p className="text-lg text-gray-600 max-w-2xl mx-auto">
-            Следите за важными событиями в реальном времени. Добавляйте даты и
-            наблюдайте, как время приближает вас к цели.
+            Никогда не забывайте о днях рождения близких! Добавляйте даты и
+            следите за обратным отсчетом до важного дня.
           </p>
         </div>
 
@@ -82,7 +81,7 @@ const Index = () => {
         {/* Timers List */}
         <div className="max-w-7xl mx-auto">
           <h2 className="text-2xl font-semibold font-montserrat text-gray-800 mb-6">
-            Активные таймеры ({timers.length})
+            Дни рождения ({timers.length})
           </h2>
           <TimerList
             timers={timers}

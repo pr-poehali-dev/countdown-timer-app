@@ -9,14 +9,13 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Plus, Calendar, Cake } from "lucide-react";
+import { Plus, Cake } from "lucide-react";
 
 interface Timer {
   id: string;
   title: string;
   targetDate: Date;
-  type: "event" | "birthday";
-  birthYear?: number;
+  birthYear: number;
 }
 
 interface AddTimerFormProps {
@@ -25,10 +24,24 @@ interface AddTimerFormProps {
 
 const AddTimerForm: React.FC<AddTimerFormProps> = ({ onAddTimer }) => {
   const [title, setTitle] = useState("");
-  const [date, setDate] = useState("");
-  const [time, setTime] = useState("");
-  const [type, setType] = useState<"event" | "birthday">("event");
+  const [day, setDay] = useState("");
+  const [month, setMonth] = useState("");
   const [birthYear, setBirthYear] = useState("");
+
+  const months = [
+    { value: "01", label: "Январь" },
+    { value: "02", label: "Февраль" },
+    { value: "03", label: "Март" },
+    { value: "04", label: "Апрель" },
+    { value: "05", label: "Май" },
+    { value: "06", label: "Июнь" },
+    { value: "07", label: "Июль" },
+    { value: "08", label: "Август" },
+    { value: "09", label: "Сентябрь" },
+    { value: "10", label: "Октябрь" },
+    { value: "11", label: "Ноябрь" },
+    { value: "12", label: "Декабрь" },
+  ];
 
   const getNextBirthday = (birthDate: Date) => {
     const today = new Date();
@@ -49,180 +62,122 @@ const AddTimerForm: React.FC<AddTimerFormProps> = ({ onAddTimer }) => {
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
 
-    if (!title || !date) {
-      alert("Пожалуйста, заполните все обязательные поля");
+    if (!title || !day || !month || !birthYear) {
+      alert("Пожалуйста, заполните все поля");
       return;
     }
 
-    if (type === "birthday") {
-      if (!birthYear) {
-        alert("Пожалуйста, укажите год рождения");
-        return;
-      }
+    const dayNum = parseInt(day);
+    const monthNum = parseInt(month);
+    const yearNum = parseInt(birthYear);
 
-      const birthDate = new Date(
-        `${birthYear}-${date.split("-")[1]}-${date.split("-")[2]}`,
-      );
-      const nextBirthday = getNextBirthday(birthDate);
-
-      onAddTimer({
-        title,
-        targetDate: nextBirthday,
-        type: "birthday",
-        birthYear: parseInt(birthYear),
-      });
-    } else {
-      if (!time) {
-        alert("Пожалуйста, укажите время события");
-        return;
-      }
-
-      const targetDate = new Date(`${date}T${time}`);
-
-      if (targetDate <= new Date()) {
-        alert("Дата должна быть в будущем");
-        return;
-      }
-
-      onAddTimer({
-        title,
-        targetDate,
-        type: "event",
-      });
+    // Проверяем корректность даты
+    if (dayNum < 1 || dayNum > 31 || monthNum < 1 || monthNum > 12) {
+      alert("Пожалуйста, введите корректную дату");
+      return;
     }
 
+    // Проверяем количество дней в месяце
+    const daysInMonth = new Date(yearNum, monthNum, 0).getDate();
+    if (dayNum > daysInMonth) {
+      alert(
+        `В ${months[monthNum - 1].label.toLowerCase()} только ${daysInMonth} дней`,
+      );
+      return;
+    }
+
+    const birthDate = new Date(yearNum, monthNum - 1, dayNum);
+    const nextBirthday = getNextBirthday(birthDate);
+
+    onAddTimer({
+      title,
+      targetDate: nextBirthday,
+      birthYear: yearNum,
+    });
+
     setTitle("");
-    setDate("");
-    setTime("");
+    setDay("");
+    setMonth("");
     setBirthYear("");
-    setType("event");
   };
 
   return (
     <Card className="bg-gradient-to-br from-purple-50 to-indigo-50 border-purple-200">
       <CardHeader>
         <CardTitle className="flex items-center gap-2 font-montserrat text-purple-800">
-          <Plus className="h-5 w-5" />
-          Добавить новый таймер
+          <Cake className="h-5 w-5" />
+          Добавить день рождения
         </CardTitle>
       </CardHeader>
       <CardContent>
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-2">
-              Тип события
-            </label>
-            <Select
-              value={type}
-              onValueChange={(value: "event" | "birthday") => setType(value)}
-            >
-              <SelectTrigger className="border-purple-200 focus:border-purple-400">
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="event">
-                  <div className="flex items-center gap-2">
-                    <Calendar className="h-4 w-4" />
-                    Обычное событие
-                  </div>
-                </SelectItem>
-                <SelectItem value="birthday">
-                  <div className="flex items-center gap-2">
-                    <Cake className="h-4 w-4" />
-                    День рождения
-                  </div>
-                </SelectItem>
-              </SelectContent>
-            </Select>
-          </div>
-
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
-              {type === "birthday" ? "Имя именинника" : "Название события"}
+              Имя именинника
             </label>
             <Input
               type="text"
               value={title}
               onChange={(e) => setTitle(e.target.value)}
-              placeholder={
-                type === "birthday"
-                  ? "Например, Анна"
-                  : "Например, Встреча с друзьями"
-              }
+              placeholder="Например, Анна"
               className="border-purple-200 focus:border-purple-400"
             />
           </div>
 
-          {type === "birthday" ? (
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Дата рождения (день и месяц)
-                </label>
-                <Input
-                  type="date"
-                  value={date}
-                  onChange={(e) => setDate(e.target.value)}
-                  className="border-purple-200 focus:border-purple-400"
-                />
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Год рождения
-                </label>
-                <Input
-                  type="number"
-                  value={birthYear}
-                  onChange={(e) => setBirthYear(e.target.value)}
-                  placeholder="1990"
-                  min="1900"
-                  max={new Date().getFullYear()}
-                  className="border-purple-200 focus:border-purple-400"
-                />
-              </div>
+          <div className="grid grid-cols-3 gap-4">
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                День
+              </label>
+              <Input
+                type="number"
+                value={day}
+                onChange={(e) => setDay(e.target.value)}
+                placeholder="15"
+                min="1"
+                max="31"
+                className="border-purple-200 focus:border-purple-400"
+              />
             </div>
-          ) : (
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Дата
-                </label>
-                <Input
-                  type="date"
-                  value={date}
-                  onChange={(e) => setDate(e.target.value)}
-                  className="border-purple-200 focus:border-purple-400"
-                />
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Время
-                </label>
-                <Input
-                  type="time"
-                  value={time}
-                  onChange={(e) => setTime(e.target.value)}
-                  className="border-purple-200 focus:border-purple-400"
-                />
-              </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Месяц
+              </label>
+              <Select value={month} onValueChange={setMonth}>
+                <SelectTrigger className="border-purple-200 focus:border-purple-400">
+                  <SelectValue placeholder="Выберите" />
+                </SelectTrigger>
+                <SelectContent>
+                  {months.map((m) => (
+                    <SelectItem key={m.value} value={m.value}>
+                      {m.label}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
             </div>
-          )}
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Год рождения
+              </label>
+              <Input
+                type="number"
+                value={birthYear}
+                onChange={(e) => setBirthYear(e.target.value)}
+                placeholder="1990"
+                min="1900"
+                max={new Date().getFullYear()}
+                className="border-purple-200 focus:border-purple-400"
+              />
+            </div>
+          </div>
 
           <Button
             type="submit"
             className="w-full bg-purple-600 hover:bg-purple-700 text-white font-medium"
           >
-            {type === "birthday" ? (
-              <>
-                <Cake className="h-4 w-4 mr-2" />
-                Добавить день рождения
-              </>
-            ) : (
-              <>
-                <Plus className="h-4 w-4 mr-2" />
-                Создать таймер
-              </>
-            )}
+            <Cake className="h-4 w-4 mr-2" />
+            Добавить день рождения
           </Button>
         </form>
       </CardContent>

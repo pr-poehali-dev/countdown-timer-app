@@ -3,14 +3,13 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import TimerDisplay from "./TimerDisplay";
-import { Trash2, Calendar, Cake } from "lucide-react";
+import { Trash2, Cake } from "lucide-react";
 
 interface Timer {
   id: string;
   title: string;
   targetDate: Date;
-  type: "event" | "birthday";
-  birthYear?: number;
+  birthYear: number;
 }
 
 interface TimerCardProps {
@@ -30,33 +29,29 @@ const TimerCard: React.FC<TimerCardProps> = ({
     const difference = target - now;
 
     if (difference <= 0) {
-      // Если это день рождения и он прошел, обновляем на следующий год
-      if (timer.type === "birthday") {
-        const nextYear = new Date(timer.targetDate);
-        nextYear.setFullYear(nextYear.getFullYear() + 1);
+      // День рождения прошел, обновляем на следующий год
+      const nextYear = new Date(timer.targetDate);
+      nextYear.setFullYear(nextYear.getFullYear() + 1);
 
-        const updatedTimer = {
-          ...timer,
-          targetDate: nextYear,
-        };
+      const updatedTimer = {
+        ...timer,
+        targetDate: nextYear,
+      };
 
-        onUpdateTimer(updatedTimer);
+      onUpdateTimer(updatedTimer);
 
-        // Пересчитываем с новой датой
-        const newDifference = nextYear.getTime() - now;
-        const days = Math.floor(newDifference / (1000 * 60 * 60 * 24));
-        const hours = Math.floor(
-          (newDifference % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60),
-        );
-        const minutes = Math.floor(
-          (newDifference % (1000 * 60 * 60)) / (1000 * 60),
-        );
-        const seconds = Math.floor((newDifference % (1000 * 60)) / 1000);
+      // Пересчитываем с новой датой
+      const newDifference = nextYear.getTime() - now;
+      const days = Math.floor(newDifference / (1000 * 60 * 60 * 24));
+      const hours = Math.floor(
+        (newDifference % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60),
+      );
+      const minutes = Math.floor(
+        (newDifference % (1000 * 60 * 60)) / (1000 * 60),
+      );
+      const seconds = Math.floor((newDifference % (1000 * 60)) / 1000);
 
-        return { days, hours, minutes, seconds, isExpired: false };
-      }
-
-      return { days: 0, hours: 0, minutes: 0, seconds: 0, isExpired: true };
+      return { days, hours, minutes, seconds, isExpired: false };
     }
 
     const days = Math.floor(difference / (1000 * 60 * 60 * 24));
@@ -70,8 +65,6 @@ const TimerCard: React.FC<TimerCardProps> = ({
   };
 
   const getAge = () => {
-    if (timer.type !== "birthday" || !timer.birthYear) return null;
-
     const targetYear = timer.targetDate.getFullYear();
     return targetYear - timer.birthYear;
   };
@@ -98,17 +91,8 @@ const TimerCard: React.FC<TimerCardProps> = ({
                 {timer.title}
               </CardTitle>
               <Badge variant="secondary" className="flex items-center gap-1">
-                {timer.type === "birthday" ? (
-                  <>
-                    <Cake className="h-3 w-3" />
-                    День рождения
-                  </>
-                ) : (
-                  <>
-                    <Calendar className="h-3 w-3" />
-                    Событие
-                  </>
-                )}
+                <Cake className="h-3 w-3" />
+                День рождения
               </Badge>
             </div>
             <p className="text-sm text-gray-500">
@@ -116,22 +100,16 @@ const TimerCard: React.FC<TimerCardProps> = ({
                 day: "numeric",
                 month: "long",
                 year: "numeric",
-                ...(timer.type === "event" && {
-                  hour: "2-digit",
-                  minute: "2-digit",
-                }),
               })}
-              {timer.type === "birthday" && age && (
-                <span className="ml-2 text-purple-600 font-medium">
-                  (исполнится {age}{" "}
-                  {age % 10 === 1 && age !== 11
-                    ? "год"
-                    : age % 10 >= 2 && age % 10 <= 4 && (age < 10 || age > 20)
-                      ? "года"
-                      : "лет"}
-                  )
-                </span>
-              )}
+              <span className="ml-2 text-purple-600 font-medium">
+                (исполнится {age}{" "}
+                {age % 10 === 1 && age !== 11
+                  ? "год"
+                  : age % 10 >= 2 && age % 10 <= 4 && (age < 10 || age > 20)
+                    ? "года"
+                    : "лет"}
+                )
+              </span>
             </p>
           </div>
           <Button
