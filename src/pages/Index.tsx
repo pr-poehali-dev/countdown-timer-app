@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import AddTimerForm from "@/components/AddTimerForm";
 import TimerList from "@/components/TimerList";
 
@@ -11,21 +11,34 @@ interface Timer {
 }
 
 const Index = () => {
-  const [timers, setTimers] = useState<Timer[]>([
-    {
-      id: "1",
-      title: "Новый год 2025",
-      targetDate: new Date("2025-01-01T00:00:00"),
-      type: "event",
-    },
-    {
-      id: "2",
-      title: "Анна",
-      targetDate: new Date("2025-03-15T00:00:00"),
-      type: "birthday",
-      birthYear: 1990,
-    },
-  ]);
+  const [timers, setTimers] = useState<Timer[]>([]);
+
+  // Загружаем данные из localStorage при первом рендере
+  useEffect(() => {
+    const savedTimers = localStorage.getItem("timers");
+    if (savedTimers) {
+      try {
+        const parsedTimers = JSON.parse(savedTimers);
+        // Преобразуем строки дат обратно в объекты Date
+        const timersWithDates = parsedTimers.map((timer: any) => ({
+          ...timer,
+          targetDate: new Date(timer.targetDate),
+        }));
+        setTimers(timersWithDates);
+      } catch (error) {
+        console.error("Ошибка при загрузке таймеров:", error);
+      }
+    }
+  }, []);
+
+  // Сохраняем данные в localStorage при изменении списка таймеров
+  useEffect(() => {
+    if (timers.length > 0) {
+      localStorage.setItem("timers", JSON.stringify(timers));
+    } else {
+      localStorage.removeItem("timers");
+    }
+  }, [timers]);
 
   const addTimer = (newTimer: Omit<Timer, "id">) => {
     const timer: Timer = {
