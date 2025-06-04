@@ -6,6 +6,8 @@ interface Timer {
   id: string;
   title: string;
   targetDate: Date;
+  type: "event" | "birthday";
+  birthYear?: number;
 }
 
 const Index = () => {
@@ -14,11 +16,14 @@ const Index = () => {
       id: "1",
       title: "Новый год 2025",
       targetDate: new Date("2025-01-01T00:00:00"),
+      type: "event",
     },
     {
       id: "2",
-      title: "День космонавтики",
-      targetDate: new Date("2025-04-12T12:00:00"),
+      title: "Анна",
+      targetDate: new Date("2025-03-15T00:00:00"),
+      type: "birthday",
+      birthYear: 1990,
     },
   ]);
 
@@ -32,6 +37,14 @@ const Index = () => {
 
   const deleteTimer = (id: string) => {
     setTimers((prev) => prev.filter((timer) => timer.id !== id));
+  };
+
+  const updateTimer = (updatedTimer: Timer) => {
+    setTimers((prev) =>
+      prev.map((timer) =>
+        timer.id === updatedTimer.id ? updatedTimer : timer,
+      ),
+    );
   };
 
   return (
@@ -58,7 +71,11 @@ const Index = () => {
           <h2 className="text-2xl font-semibold font-montserrat text-gray-800 mb-6">
             Активные таймеры ({timers.length})
           </h2>
-          <TimerList timers={timers} onDeleteTimer={deleteTimer} />
+          <TimerList
+            timers={timers}
+            onDeleteTimer={deleteTimer}
+            onUpdateTimer={updateTimer}
+          />
         </div>
       </div>
     </div>

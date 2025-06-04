@@ -5,14 +5,21 @@ interface Timer {
   id: string;
   title: string;
   targetDate: Date;
+  type: "event" | "birthday";
+  birthYear?: number;
 }
 
 interface TimerListProps {
   timers: Timer[];
   onDeleteTimer: (id: string) => void;
+  onUpdateTimer: (timer: Timer) => void;
 }
 
-const TimerList: React.FC<TimerListProps> = ({ timers, onDeleteTimer }) => {
+const TimerList: React.FC<TimerListProps> = ({
+  timers,
+  onDeleteTimer,
+  onUpdateTimer,
+}) => {
   if (timers.length === 0) {
     return (
       <div className="text-center py-12">
@@ -21,7 +28,7 @@ const TimerList: React.FC<TimerListProps> = ({ timers, onDeleteTimer }) => {
           Пока нет активных таймеров
         </h3>
         <p className="text-gray-500">
-          Добавьте первый таймер, чтобы начать отсчет времени
+          Добавьте свой первый таймер, чтобы начать отслеживать важные события
         </p>
       </div>
     );
@@ -30,7 +37,12 @@ const TimerList: React.FC<TimerListProps> = ({ timers, onDeleteTimer }) => {
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
       {timers.map((timer) => (
-        <TimerCard key={timer.id} timer={timer} onDelete={onDeleteTimer} />
+        <TimerCard
+          key={timer.id}
+          timer={timer}
+          onDelete={onDeleteTimer}
+          onUpdateTimer={onUpdateTimer}
+        />
       ))}
     </div>
   );
